@@ -11,6 +11,11 @@ class FileCompressApp(ctk.CTkFrame):
         self.root = root
         self.dashboard = dashboard
         
+        # Initialize last selected locations
+        self.last_file_location = os.path.expanduser("~")
+        self.last_folder_location = os.path.expanduser("~")
+        self.last_save_location = os.path.expanduser("~")
+        
         # Create main container to hold content and log
         main_container = ctk.CTkFrame(self, fg_color="transparent")
         main_container.pack(fill=tk.BOTH, expand=True)
@@ -41,21 +46,35 @@ class FileCompressApp(ctk.CTkFrame):
             text_color="#FFFFFF"
         ).pack(side=tk.LEFT, padx=5)
         
-        self.format_var = tk.StringVar(value="ZIP")
-        format_combo = ctk.CTkComboBox(
+        # Create format checkboxes
+        self.zip_var = tk.BooleanVar(value=True)
+        self.sevenz_var = tk.BooleanVar(value=False)
+        
+        zip_checkbox = ctk.CTkCheckBox(
             format_frame,
-            values=["ZIP", "7Z"],
-            variable=self.format_var,
-            state="readonly",
-            width=120,
+            text="ZIP",
+            variable=self.zip_var,
             font=ctk.CTkFont(size=14),
-            fg_color="#333333",
-            button_color="#404040",
-            button_hover_color="#505050",
-            border_color="#00F5C4",
-            dropdown_fg_color="#333333"
+            checkbox_width=20,
+            checkbox_height=20,
+            border_width=2,
+            fg_color="#00F5C4",
+            hover_color="#00D4A8"
         )
-        format_combo.pack(side=tk.LEFT, padx=5)
+        zip_checkbox.pack(side=tk.LEFT, padx=10)
+        
+        sevenz_checkbox = ctk.CTkCheckBox(
+            format_frame,
+            text="7Z",
+            variable=self.sevenz_var,
+            font=ctk.CTkFont(size=14),
+            checkbox_width=20,
+            checkbox_height=20,
+            border_width=2,
+            fg_color="#00F5C4",
+            hover_color="#00D4A8"
+        )
+        sevenz_checkbox.pack(side=tk.LEFT, padx=10)
         
         # Buttons with modern style
         buttons_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
@@ -161,9 +180,12 @@ class FileCompressApp(ctk.CTkFrame):
             self.add_log("Opening file selection dialog...")
             paths = filedialog.askopenfilenames(
                 title="Select Files to Compress",
-                filetypes=[("All files", "*.*")]
+                filetypes=[("All files", "*.*")],
+                initialdir=self.last_file_location
             )
             if paths:
+                # Remember the parent directory of the first selected file
+                self.last_file_location = os.path.dirname(os.path.dirname(paths[0]))
                 self.add_log(f"Selected {len(paths)} file(s)")
                 self.handle_compression(paths)
             else:
@@ -171,9 +193,12 @@ class FileCompressApp(ctk.CTkFrame):
         else:  # folder
             self.add_log("Opening folder selection dialog...")
             path = filedialog.askdirectory(
-                title="Select Folder to Compress"
+                title="Select Folder to Compress",
+                initialdir=self.last_folder_location
             )
             if path:
+                # Remember the parent directory of the selected folder
+                self.last_folder_location = os.path.dirname(path)
                 self.add_log(f"Selected folder: {os.path.basename(path)}")
                 self.handle_compression([path])
             else:
@@ -183,20 +208,15 @@ class FileCompressApp(ctk.CTkFrame):
         if not paths:
             return
             
-        self.add_log("Opening save dialog...")
-        # Get output path
-        output_path = filedialog.asksaveasfilename(
-            defaultextension=f".{self.format_var.get().lower()}",
-            filetypes=[
-                (f"{self.format_var.get()} files", f"*.{self.format_var.get().lower()}"),
-                ("All files", "*.*")
-            ]
-        )
-        
-        if not output_path:
-            self.add_log("Save location selection cancelled")
-            return
+        # Determine base name for the archive
+        if len(paths) == 1:
+            base_name = os.path.basename(paths[0])
+        else:
+            base_name = "compressed_files"
             
+        # Get the directory of the first selected item
+        base_dir = os.path.dirname(paths[0])
+        
         # Show progress
         self.progress.pack(pady=20)
         self.progress.start()
@@ -213,26 +233,39 @@ class FileCompressApp(ctk.CTkFrame):
                     if excluded_files:
                         self.add_log(f"Excluding system files from {os.path.basename(root)}: {', '.join(excluded_files)}")
         
-        # Compress files
-        format_type = self.format_var.get().lower()
-        self.add_log(f"Starting compression in {format_type.upper()} format...")
+        # Compress files in selected formats
+        success_messages = []
+        error_messages = []
         
-        if format_type == 'zip':
+        if self.zip_var.get():
+            output_path = os.path.join(base_dir, f"{base_name}.zip")
+            self.add_log(f"Starting compression in ZIP format...")
             success, message = CompressionUtils.compress_to_zip(paths, output_path)
-        else:  # 7z
+            if success:
+                success_messages.append(f"ZIP: {message}")
+            else:
+                error_messages.append(f"ZIP: {message}")
+                
+        if self.sevenz_var.get():
+            output_path = os.path.join(base_dir, f"{base_name}.7z")
+            self.add_log(f"Starting compression in 7Z format...")
             success, message = CompressionUtils.compress_to_7z(paths, output_path)
+            if success:
+                success_messages.append(f"7Z: {message}")
+            else:
+                error_messages.append(f"7Z: {message}")
             
         # Hide progress
         self.progress.stop()
         self.progress.pack_forget()
         
-        # Show result
-        if success:
-            self.add_log(f"Success: {message}")
-            messagebox.showinfo("Success", message)
-        else:
-            self.add_log(f"Error: {message}")
-            messagebox.showerror("Error", message)
+        # Show results
+        if success_messages:
+            self.add_log("Success: " + "\n".join(success_messages))
+            messagebox.showinfo("Success", "\n".join(success_messages))
+        if error_messages:
+            self.add_log("Error: " + "\n".join(error_messages))
+            messagebox.showerror("Error", "\n".join(error_messages))
     
     def extract_files(self):
         self.add_log("Opening archive selection dialog...")
