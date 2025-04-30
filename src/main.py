@@ -136,10 +136,10 @@ class DashboardScreen:
             self.show_home_view
         )
         
-        # FileCompressX button
+        # SnapZip button
         self.file_compress_btn = self.create_nav_button(
             nav_frame,
-            "📁 FileCompressX",
+            "📁 SnapZip",
             self.show_file_compress
         )
         
@@ -227,7 +227,7 @@ class DashboardScreen:
 SG One is a powerful suite of creative tools designed for the Saks Global team.
 It provides two main applications:
 
-• FileCompressX
+• SnapZip
   - Compress multiple files and folders
   - Support for ZIP and 7Z formats
   - Easy extraction of archives

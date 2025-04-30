@@ -25,7 +25,7 @@ class FileCompressApp(ctk.CTkFrame):
         
         ctk.CTkLabel(
             title_frame,
-            text="SG One FileCompressX",
+            text="SG One SnapZip",
             font=ctk.CTkFont(size=24, weight="bold"),
             text_color="#00F5C4"
         ).pack(side=tk.LEFT)
