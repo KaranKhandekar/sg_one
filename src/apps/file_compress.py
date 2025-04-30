@@ -15,6 +15,7 @@ class FileCompressApp(ctk.CTkFrame):
         self.last_file_location = os.path.expanduser("~")
         self.last_folder_location = os.path.expanduser("~")
         self.last_save_location = os.path.expanduser("~")
+        self.last_batch_parent_location = os.path.expanduser("~")  # New variable for batch zip parent folder
         
         # Create main container to hold content and log
         main_container = ctk.CTkFrame(self, fg_color="transparent")
@@ -110,7 +111,21 @@ class FileCompressApp(ctk.CTkFrame):
             hover_color="#00D4A8",
             corner_radius=10
         )
-        select_folder_btn.pack(fill=tk.X)
+        select_folder_btn.pack(fill=tk.X, pady=(0, 10))
+        
+        # Batch Zip button
+        batch_zip_btn = ctk.CTkButton(
+            selection_frame,
+            text="Batch Zip Folders",
+            font=ctk.CTkFont(size=14, weight="bold"),
+            height=50,
+            command=self.handle_batch_zip,
+            fg_color="#00F5C4",
+            text_color="#000000",
+            hover_color="#00D4A8",
+            corner_radius=10
+        )
+        batch_zip_btn.pack(fill=tk.X)
         
         # Extract button
         extract_btn = ctk.CTkButton(
@@ -316,4 +331,87 @@ class FileCompressApp(ctk.CTkFrame):
             messagebox.showinfo("Success", message)
         else:
             self.add_log(f"Error: {message}")
-            messagebox.showerror("Error", message) 
+            messagebox.showerror("Error", message)
+    
+    def handle_batch_zip(self):
+        """Handle batch compression of multiple folders"""
+        self.add_log("Select parent folder containing folders to compress...")
+        
+        # Open directory selection dialog
+        parent_folder = filedialog.askdirectory(
+            title="Select Parent Folder",
+            initialdir=self.last_batch_parent_location  # Use the batch parent location
+        )
+        
+        if not parent_folder:
+            self.add_log("Folder selection cancelled")
+            return
+            
+        # Remember the parent directory for both regular and batch operations
+        self.last_folder_location = parent_folder
+        self.last_batch_parent_location = parent_folder  # Remember for next batch operation
+        
+        # Get all immediate subdirectories
+        folder_paths = []
+        for item in os.listdir(parent_folder):
+            item_path = os.path.join(parent_folder, item)
+            if os.path.isdir(item_path):
+                folder_paths.append(item_path)
+        
+        if not folder_paths:
+            self.add_log("No folders found in the selected directory")
+            messagebox.showwarning("Warning", "No folders found in the selected directory!")
+            return
+            
+        self.add_log(f"Found {len(folder_paths)} folders for batch compression")
+        
+        # Show progress
+        self.progress.pack(pady=20)
+        self.progress.start()
+        
+        success_messages = []
+        error_messages = []
+        
+        # Process each folder
+        for i, folder_path in enumerate(folder_paths):
+            self.progress.set(i / len(folder_paths))
+            self.root.update()
+            
+            folder_name = os.path.basename(folder_path)
+            
+            # Log files being excluded
+            for root, dirs, files in os.walk(folder_path):
+                excluded_files = [f for f in files if CompressionUtils.should_exclude_file(f)]
+                if excluded_files:
+                    self.add_log(f"Excluding system files from {os.path.basename(root)}: {', '.join(excluded_files)}")
+            
+            # Compress in selected formats
+            if self.zip_var.get():
+                output_path = os.path.join(parent_folder, f"{folder_name}.zip")
+                self.add_log(f"Compressing {folder_name} to ZIP...")
+                success, message = CompressionUtils.compress_to_zip([folder_path], output_path)
+                if success:
+                    success_messages.append(f"ZIP: {folder_name} - {message}")
+                else:
+                    error_messages.append(f"ZIP: {folder_name} - {message}")
+                    
+            if self.sevenz_var.get():
+                output_path = os.path.join(parent_folder, f"{folder_name}.7z")
+                self.add_log(f"Compressing {folder_name} to 7Z...")
+                success, message = CompressionUtils.compress_to_7z([folder_path], output_path)
+                if success:
+                    success_messages.append(f"7Z: {folder_name} - {message}")
+                else:
+                    error_messages.append(f"7Z: {folder_name} - {message}")
+        
+        # Hide progress
+        self.progress.stop()
+        self.progress.pack_forget()
+        
+        # Show results
+        if success_messages:
+            self.add_log("Success: " + "\n".join(success_messages))
+            messagebox.showinfo("Success", "\n".join(success_messages))
+        if error_messages:
+            self.add_log("Error: " + "\n".join(error_messages))
+            messagebox.showerror("Error", "\n".join(error_messages)) 
