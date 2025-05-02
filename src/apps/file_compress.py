@@ -116,7 +116,7 @@ class FileCompressApp(ctk.CTkFrame):
         # Batch Zip button
         batch_zip_btn = ctk.CTkButton(
             selection_frame,
-            text="Batch Zip Folders",
+            text="Batch Zip",
             font=ctk.CTkFont(size=14, weight="bold"),
             height=50,
             command=self.handle_batch_zip,

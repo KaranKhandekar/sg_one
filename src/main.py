@@ -143,10 +143,10 @@ class DashboardScreen:
             self.show_file_compress
         )
         
-        # MediaCompressX button
+        # MediaPress button
         self.media_compress_btn = self.create_nav_button(
             nav_frame,
-            "🎬 MediaCompressX",
+            "🎬 MediaPress",
             self.show_media_compress
         )
         
@@ -238,8 +238,8 @@ It provides two main applications:
     ∙ desktop.ini (Windows)
   - Real-time activity logging
 
-• MediaCompressX
-  - Compress images with quality control
+• MediaPress
+  - Compress media files while maintaining quality
   - Support for various image formats
   - Video compression (Coming Soon)
   - Audio compression (Coming Soon)

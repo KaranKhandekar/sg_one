@@ -24,12 +24,15 @@ class MediaCompressApp(ctk.CTkFrame):
         back_btn.pack(side=tk.LEFT, padx=20)
         
         # Title
+        title_frame = ctk.CTkFrame(header_frame, fg_color="transparent")
+        title_frame.pack(side=tk.LEFT)
+        
         ctk.CTkLabel(
-            header_frame,
-            text="MediaCompressX",
+            title_frame,
+            text="MediaPress",
             font=ctk.CTkFont(size=24, weight="bold"),
-            text_color="#ffffff"
-        ).pack(side=tk.LEFT, padx=20)
+            text_color="#00F5C4"
+        ).pack(side=tk.LEFT)
         
         # Create main content
         content_frame = ctk.CTkFrame(self, fg_color="transparent")
