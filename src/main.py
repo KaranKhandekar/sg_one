@@ -7,6 +7,7 @@ from PIL import Image, ImageTk
 import time
 from apps.file_compress import FileCompressApp
 from apps.media_compress import MediaCompressApp
+import tkinter.messagebox as messagebox
 
 class SplashScreen:
     def __init__(self, root):
@@ -270,6 +271,7 @@ Choose an application from the sidebar to get started!
             self.current_view.destroy()
         self.current_view = MediaCompressApp(self.content_frame, self)
         self.current_view.pack(fill=tk.BOTH, expand=True)
+        self.root.update()  # Force update the UI
     
     def clear_content(self):
         for widget in self.content_frame.winfo_children():
@@ -279,6 +281,7 @@ Choose an application from the sidebar to get started!
         self.show_home_view()
 
 def main():
+    # Create root window
     root = ctk.CTk()
     
     # Show splash screen
@@ -287,7 +290,23 @@ def main():
     
     # Create new root window for dashboard
     root = ctk.CTk()
+    root.title("SG One")
+    root.geometry("1400x800")
+    
+    # Configure theme
+    ctk.set_appearance_mode("dark")
+    ctk.set_default_color_theme("blue")
+    
+    # Create dashboard
     app = DashboardScreen(root)
+    
+    # Handle window close
+    def on_closing():
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            root.quit()
+            root.destroy()
+    
+    root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
 
 if __name__ == "__main__":
