@@ -9,6 +9,7 @@ from moviepy.editor import VideoFileClip
 import numpy as np
 import warnings
 import logging
+import time
 
 # Configure logging
 logging.getLogger('PIL').setLevel(logging.WARNING)
@@ -252,6 +253,18 @@ class MediaCompressApp(ctk.CTkFrame):
         )
         convert_btn.pack(fill=tk.X, pady=10)
         
+        # Add progress bar for GIF conversion
+        self.gif_progress = ctk.CTkProgressBar(
+            gif_frame,
+            width=300,
+            height=8,
+            corner_radius=4,
+            progress_color="#00F5C4",
+            fg_color="#333333"
+        )
+        self.gif_progress.set(0)
+        self.gif_progress.pack(fill=tk.X, pady=(0, 10))
+        
         # Create log panel
         log_frame = ctk.CTkFrame(self.main_container, fg_color="#252525", corner_radius=15, width=300)
         log_frame.pack(side=tk.RIGHT, fill=tk.BOTH, padx=(10, 0), pady=0)
@@ -308,6 +321,10 @@ class MediaCompressApp(ctk.CTkFrame):
         self.root.lift()
         self.root.focus_force()
         
+        # Reset progress bar
+        self.gif_progress.set(0)
+        self.gif_progress.pack(fill=tk.X, pady=(0, 10))
+        
         self.add_log("Opening video selection dialog...")
         
         # Get input video
@@ -321,6 +338,7 @@ class MediaCompressApp(ctk.CTkFrame):
         
         if not input_path:
             self.add_log("Video selection cancelled")
+            self.gif_progress.pack_forget()
             return
             
         # Get output path
@@ -332,12 +350,9 @@ class MediaCompressApp(ctk.CTkFrame):
         
         if not output_path:
             self.add_log("Output path selection cancelled")
+            self.gif_progress.pack_forget()
             return
             
-        # Show progress
-        self.progress.pack(pady=20)
-        self.progress.start()
-        
         try:
             self.add_log(f"Loading video: {os.path.basename(input_path)}")
             video = VideoFileClip(input_path)
@@ -374,22 +389,62 @@ class MediaCompressApp(ctk.CTkFrame):
             # Create a temporary file for the initial GIF
             temp_gif = output_path + ".temp.gif"
             
-            # Write the GIF with moviepy using basic settings
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                # Disable Tkinter update checks during conversion
-                self.root.after_cancel("update")
-                self.root.after_cancel("check_dpi_scaling")
-                video.write_gif(
-                    temp_gif,
-                    fps=fps,
-                    program='ffmpeg',
-                    opt='optimizeplus',
-                    fuzz=10,
-                    loop=0
-                )
+            # Calculate total frames
+            total_frames = int(video.duration * fps)
+            self.add_log(f"Total frames to process: {total_frames}")
             
-            # Check file size and compress if needed
+            # Create a temporary directory for frames
+            temp_dir = os.path.join(os.path.dirname(temp_gif), "temp_frames")
+            os.makedirs(temp_dir, exist_ok=True)
+            
+            # Extract frames with progress (40% of total progress)
+            frame_paths = []
+            for i in range(total_frames):
+                t = i / fps
+                frame_path = os.path.join(temp_dir, f"frame_{i:04d}.png")
+                video.save_frame(frame_path, t=t)
+                frame_paths.append(frame_path)
+                
+                # Update progress (0-40%)
+                progress = (i + 1) / total_frames * 0.4
+                self.gif_progress.set(progress)
+                self.root.update()
+                self.root.update_idletasks()
+            
+            # Create GIF from frames (40-80% of total progress)
+            self.add_log("Creating animated GIF from frames...")
+            
+            # Load all frames
+            frames = []
+            for frame_path in frame_paths:
+                frames.append(Image.open(frame_path))
+            
+            # Save all frames at once
+            frames[0].save(
+                temp_gif,
+                save_all=True,
+                append_images=frames[1:],
+                duration=int(1000/fps),
+                loop=0
+            )
+            
+            # Update progress to 80%
+            self.gif_progress.set(0.8)
+            self.root.update()
+            self.root.update_idletasks()
+            
+            # Clean up temporary frames
+            for frame_path in frame_paths:
+                try:
+                    os.remove(frame_path)
+                except:
+                    pass
+            try:
+                os.rmdir(temp_dir)
+            except:
+                pass
+            
+            # Check file size and compress if needed (80-100% of total progress)
             file_size = os.path.getsize(temp_gif) / (1024 * 1024)  # Size in MB
             self.add_log(f"Initial GIF size: {file_size:.2f}MB")
             
@@ -424,6 +479,11 @@ class MediaCompressApp(ctk.CTkFrame):
                 # Move temporary file to final location
                 os.rename(temp_gif, output_path)
             
+            # Update progress to 100%
+            self.gif_progress.set(1.0)
+            self.root.update()
+            self.root.update_idletasks()
+            
             final_size = os.path.getsize(output_path) / (1024 * 1024)
             self.add_log(f"Final GIF size: {final_size:.2f}MB")
             
@@ -437,8 +497,8 @@ class MediaCompressApp(ctk.CTkFrame):
             messagebox.showerror("Error", f"Failed to convert video to animated GIF: {str(e)}")
         finally:
             # Hide progress
-            self.progress.stop()
-            self.progress.pack_forget()
+            self.gif_progress.set(0)
+            self.gif_progress.pack_forget()
             if 'video' in locals():
                 video.close()
             # Clean up temporary file if it exists
