@@ -57,49 +57,48 @@ class ImageProcessor(threading.Thread):
             self.stats['total_images'] = len(image_files)
             processed = 0
 
-            # Sort and distribute groups
-            sorted_groups = sorted(image_groups.items())
-            total_groups = len(sorted_groups)
+            # Sort groups by size (number of files in each group)
+            sorted_groups = sorted(image_groups.items(), key=lambda x: len(x[1]), reverse=True)
             
-            # Calculate base groups per designer and remainder
-            base_groups = total_groups // self.num_designers
-            remainder = total_groups % self.num_designers
-            
-            # Create a list of group counts for each designer
-            designer_group_counts = [base_groups + (1 if i < remainder else 0) for i in range(self.num_designers)]
+            # Initialize designer loads
+            designer_loads = [0] * self.num_designers
+            designer_groups = [[] for _ in range(self.num_designers)]
             
             # Distribute groups to designers
-            current_group_index = 0
-            for designer_index, group_count in enumerate(designer_group_counts):
+            for file_id, group_files in sorted_groups:
+                # Find designer with minimum load
+                min_load_designer = designer_loads.index(min(designer_loads))
+                
+                # Add group to the designer with minimum load
+                designer_groups[min_load_designer].append((file_id, group_files))
+                designer_loads[min_load_designer] += len(group_files)
+            
+            # Process the distributed groups
+            for designer_index, groups in enumerate(designer_groups):
                 designer_folder = os.path.join(self.source_folder, f'Designer_{designer_index + 1}')
                 
-                # Get groups for this designer
-                for _ in range(group_count):
-                    if current_group_index < len(sorted_groups):
-                        file_id, group_files = sorted_groups[current_group_index]
-                        current_group_index += 1
-                        
-                        for image_path in group_files:
-                            image_file = os.path.basename(image_path)
-                            dest_path = os.path.join(designer_folder, image_file)
-                            self.stats['designer_files'][f'Designer_{designer_index + 1}'].append(image_file)
+                for file_id, group_files in groups:
+                    for image_path in group_files:
+                        image_file = os.path.basename(image_path)
+                        dest_path = os.path.join(designer_folder, image_file)
+                        self.stats['designer_files'][f'Designer_{designer_index + 1}'].append(image_file)
 
-                            try:
-                                os.rename(image_path, dest_path)
-                                
-                                if self.is_white_background(dest_path):
-                                    self.stats['white_background'] += 1
-                                    self.apply_mac_tag(dest_path, 6)
-                                else:
-                                    self.stats['non_white_background'] += 1
-                                    self.apply_mac_tag(dest_path, 4)
-                                
-                                processed += 1
-                                elapsed_time = time.time() - start_time
-                                self.progress_callback(processed, self.format_time(elapsed_time), self.stats)
+                        try:
+                            os.rename(image_path, dest_path)
+                            
+                            if self.is_white_background(dest_path):
+                                self.stats['white_background'] += 1
+                                self.apply_mac_tag(dest_path, 6)
+                            else:
+                                self.stats['non_white_background'] += 1
+                                self.apply_mac_tag(dest_path, 4)
+                            
+                            processed += 1
+                            elapsed_time = time.time() - start_time
+                            self.progress_callback(processed, self.format_time(elapsed_time), self.stats)
 
-                            except Exception as e:
-                                print(f"Error processing {image_file}: {str(e)}")
+                        except Exception as e:
+                            print(f"Error processing {image_file}: {str(e)}")
 
             self.create_excel_report(start_time)
             self.complete_callback(self.stats)
