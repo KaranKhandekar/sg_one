@@ -9,6 +9,7 @@ from tkinter import filedialog, messagebox, scrolledtext
 from PIL import Image
 import subprocess
 import threading
+import openpyxl.styles
 
 class ImageProcessor(threading.Thread):
     def __init__(self, source_folder, num_designers, progress_callback, complete_callback, scan_callback):
@@ -59,39 +60,46 @@ class ImageProcessor(threading.Thread):
             # Sort and distribute groups
             sorted_groups = sorted(image_groups.items())
             total_groups = len(sorted_groups)
-            groups_per_designer = total_groups // self.num_designers
-            extra_groups = total_groups % self.num_designers
-
-            current_designer = 0
-            for i, (file_id, group_files) in enumerate(sorted_groups):
-                if i < (groups_per_designer + 1) * extra_groups:
-                    current_designer = i // (groups_per_designer + 1)
-                else:
-                    current_designer = (i - extra_groups) // groups_per_designer
-
-                designer_folder = os.path.join(self.source_folder, f'Designer_{current_designer + 1}')
+            
+            # Calculate base groups per designer and remainder
+            base_groups = total_groups // self.num_designers
+            remainder = total_groups % self.num_designers
+            
+            # Create a list of group counts for each designer
+            designer_group_counts = [base_groups + (1 if i < remainder else 0) for i in range(self.num_designers)]
+            
+            # Distribute groups to designers
+            current_group_index = 0
+            for designer_index, group_count in enumerate(designer_group_counts):
+                designer_folder = os.path.join(self.source_folder, f'Designer_{designer_index + 1}')
                 
-                for image_path in group_files:
-                    image_file = os.path.basename(image_path)
-                    dest_path = os.path.join(designer_folder, image_file)
-                    self.stats['designer_files'][f'Designer_{current_designer + 1}'].append(image_file)
-
-                    try:
-                        os.rename(image_path, dest_path)
+                # Get groups for this designer
+                for _ in range(group_count):
+                    if current_group_index < len(sorted_groups):
+                        file_id, group_files = sorted_groups[current_group_index]
+                        current_group_index += 1
                         
-                        if self.is_white_background(dest_path):
-                            self.stats['white_background'] += 1
-                            self.apply_mac_tag(dest_path, 6)
-                        else:
-                            self.stats['non_white_background'] += 1
-                            self.apply_mac_tag(dest_path, 4)
-                        
-                        processed += 1
-                        elapsed_time = time.time() - start_time
-                        self.progress_callback(processed, self.format_time(elapsed_time), self.stats)
+                        for image_path in group_files:
+                            image_file = os.path.basename(image_path)
+                            dest_path = os.path.join(designer_folder, image_file)
+                            self.stats['designer_files'][f'Designer_{designer_index + 1}'].append(image_file)
 
-                    except Exception as e:
-                        print(f"Error processing {image_file}: {str(e)}")
+                            try:
+                                os.rename(image_path, dest_path)
+                                
+                                if self.is_white_background(dest_path):
+                                    self.stats['white_background'] += 1
+                                    self.apply_mac_tag(dest_path, 6)
+                                else:
+                                    self.stats['non_white_background'] += 1
+                                    self.apply_mac_tag(dest_path, 4)
+                                
+                                processed += 1
+                                elapsed_time = time.time() - start_time
+                                self.progress_callback(processed, self.format_time(elapsed_time), self.stats)
+
+                            except Exception as e:
+                                print(f"Error processing {image_file}: {str(e)}")
 
             self.create_excel_report(start_time)
             self.complete_callback(self.stats)
@@ -159,8 +167,40 @@ class ImageProcessor(threading.Thread):
             excel_path = os.path.join(self.source_folder, 'SplitImg_Report.xlsx')
             
             with pd.ExcelWriter(excel_path, engine='openpyxl') as writer:
+                # Write the main data
                 df.to_excel(writer, sheet_name='Designer Files', index=False)
                 
+                # Get the worksheet
+                worksheet = writer.sheets['Designer Files']
+                
+                # Define colors
+                dark_blue = "D9E1F2"  # Dark Blue, Text 2, Lighter 80%
+                olive_green = "E2EFDA"  # Olive Green, Accent 3, Lighter 80%
+                
+                # Apply colors based on background detection
+                for col in range(1, len(df.columns) + 1):
+                    for row in range(2, len(df) + 2):  # Start from 2 to skip header
+                        cell_value = worksheet.cell(row=row, column=col).value
+                        if cell_value:
+                            # Check if the file has white background
+                            is_white = False
+                            for designer, files in self.stats['designer_files'].items():
+                                if cell_value in files:
+                                    # Find the file in the source folder
+                                    file_path = os.path.join(self.source_folder, designer, cell_value)
+                                    if os.path.exists(file_path):
+                                        is_white = self.is_white_background(file_path)
+                                    break
+                            
+                            # Apply the appropriate color
+                            fill_color = olive_green if is_white else dark_blue
+                            worksheet.cell(row=row, column=col).fill = openpyxl.styles.PatternFill(
+                                start_color=fill_color,
+                                end_color=fill_color,
+                                fill_type="solid"
+                            )
+                
+                # Write the summary sheet
                 extensions_text = ', '.join(f"{ext} ({count})" for ext, count in self.stats['extensions'].items())
                 
                 total_time = time.time() - start_time
@@ -202,15 +242,22 @@ class SplitImageApp(ctk.CTkFrame):
         self.dashboard = dashboard
         self.processor = None
         
-        print("Creating main container...")  # Debug log
         # Create main container
         main_container = ctk.CTkFrame(self, fg_color="transparent")
         main_container.pack(fill=tk.BOTH, expand=True)
         
+        # Create left panel container with scroll
+        left_container = ctk.CTkFrame(main_container, fg_color="transparent")
+        left_container.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+        
+        # Create scrollable frame for left panel
+        self.scrollable_frame = ctk.CTkScrollableFrame(left_container, fg_color="transparent")
+        self.scrollable_frame.pack(fill=tk.BOTH, expand=True)
+        
         print("Creating left panel...")  # Debug log
         # Create left panel (Settings and Stats)
-        left_panel = ctk.CTkFrame(main_container, fg_color="#252525", corner_radius=15)
-        left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10), pady=0)
+        left_panel = ctk.CTkFrame(self.scrollable_frame, fg_color="#252525", corner_radius=15)
+        left_panel.pack(fill=tk.BOTH, expand=True)
         
         # Title
         title_frame = ctk.CTkFrame(left_panel, fg_color="transparent")
@@ -253,7 +300,7 @@ class SplitImageApp(ctk.CTkFrame):
             width=400,
             height=35
         )
-        self.designer_input.pack(fill=tk.X, expand=True, pady=(0, 20), padx=20)
+        self.designer_input.pack(pady=(0, 20), padx=20)
         
         # Source Folder Selection
         folder_frame = ctk.CTkFrame(settings_frame, fg_color="#333333", corner_radius=10)
@@ -272,6 +319,7 @@ class SplitImageApp(ctk.CTkFrame):
         self.folder_input = ctk.CTkEntry(
             folder_input_frame,
             placeholder_text="No folder selected",
+            width=400,
             height=35
         )
         self.folder_input.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
@@ -327,41 +375,53 @@ class SplitImageApp(ctk.CTkFrame):
         self.process_progress_bar.pack(pady=(0, 20), padx=20)
         self.process_progress_bar.set(0)
         
-        # Statistics Frame
+        # Statistics Frame with two columns
         stats_frame = ctk.CTkFrame(settings_frame, fg_color="#333333", corner_radius=10)
         stats_frame.pack(fill=tk.X, pady=(0, 20))
         
+        # Create two columns for stats
+        stats_columns = ctk.CTkFrame(stats_frame, fg_color="transparent")
+        stats_columns.pack(fill=tk.X, padx=20, pady=20)
+        
+        # Column 1
+        col1 = ctk.CTkFrame(stats_columns, fg_color="transparent")
+        col1.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
         self.total_images_label = ctk.CTkLabel(
-            stats_frame,
+            col1,
             text="Total Images Processed: 0",
             font=ctk.CTkFont(size=14),
             text_color="#FFFFFF"
         )
-        self.total_images_label.pack(pady=(20, 10), padx=20)
-        
-        self.white_bg_label = ctk.CTkLabel(
-            stats_frame,
-            text="White Background Images: 0",
-            font=ctk.CTkFont(size=14),
-            text_color="#FFFFFF"
-        )
-        self.white_bg_label.pack(pady=(0, 10), padx=20)
-        
-        self.non_white_bg_label = ctk.CTkLabel(
-            stats_frame,
-            text="Non-White Background Images: 0",
-            font=ctk.CTkFont(size=14),
-            text_color="#FFFFFF"
-        )
-        self.non_white_bg_label.pack(pady=(0, 10), padx=20)
+        self.total_images_label.pack(pady=(0, 10))
         
         self.time_label = ctk.CTkLabel(
-            stats_frame,
+            col1,
             text="Time Taken: 00:00:00",
             font=ctk.CTkFont(size=14),
             text_color="#FFFFFF"
         )
-        self.time_label.pack(pady=(0, 20), padx=20)
+        self.time_label.pack(pady=(0, 10))
+        
+        # Column 2
+        col2 = ctk.CTkFrame(stats_columns, fg_color="transparent")
+        col2.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        self.white_bg_label = ctk.CTkLabel(
+            col2,
+            text="White Background Images: 0",
+            font=ctk.CTkFont(size=14),
+            text_color="#FFFFFF"
+        )
+        self.white_bg_label.pack(pady=(0, 10))
+        
+        self.non_white_bg_label = ctk.CTkLabel(
+            col2,
+            text="Non-White Background Images: 0",
+            font=ctk.CTkFont(size=14),
+            text_color="#FFFFFF"
+        )
+        self.non_white_bg_label.pack(pady=(0, 10))
         
         # Action Buttons
         buttons_frame = ctk.CTkFrame(settings_frame, fg_color="transparent")
@@ -391,7 +451,7 @@ class SplitImageApp(ctk.CTkFrame):
         )
         reset_button.pack(side=tk.LEFT)
         
-        # Create right panel (Logs)
+        # Create right panel (Logs) - Fixed position
         right_panel = ctk.CTkFrame(main_container, fg_color="#252525", corner_radius=15, width=300)
         right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, padx=(10, 0), pady=0)
         right_panel.pack_propagate(False)
@@ -439,11 +499,26 @@ class SplitImageApp(ctk.CTkFrame):
         # Bind input validation
         self.designer_input.bind('<KeyRelease>', lambda e: self.validate_inputs())
         
+        # Add these lines at the start of __init__
+        self.last_designer_count = ""
+        self.last_folder_path = ""
+        
+        # Bind resize event
+        self.bind('<Configure>', self._on_resize)
+    
+    def _on_resize(self, event):
+        # Update scrollable frame width when the frame is resized
+        self.scrollable_frame.configure(width=event.width - 320)  # Account for right panel width
+    
+    def _on_mousewheel(self, event):
+        self.scrollable_frame.yview_scroll(int(-1*(event.delta/120)), "units")
+    
     def browse_folder(self):
         folder = filedialog.askdirectory(title="Select Image Folder")
         if folder:
             self.folder_input.delete(0, tk.END)
             self.folder_input.insert(0, folder)
+            self.last_folder_path = folder
             self.validate_inputs()
             self.add_log(f"Source folder selected: {folder}")
     
@@ -453,6 +528,7 @@ class SplitImageApp(ctk.CTkFrame):
             if self.designer_input.get():
                 num_designers = int(self.designer_input.get())
                 designer_valid = 1 <= num_designers <= 60
+                self.last_designer_count = self.designer_input.get()
         except ValueError:
             designer_valid = False
         
@@ -533,6 +609,13 @@ class SplitImageApp(ctk.CTkFrame):
             self.process_progress_label.configure(text="Processing Images...")
             self.run_button.configure(state="disabled")
             self.add_log("Application reset")
+            
+            # Restore last values
+            if self.last_designer_count:
+                self.designer_input.insert(0, self.last_designer_count)
+            if self.last_folder_path:
+                self.folder_input.insert(0, self.last_folder_path)
+            self.validate_inputs()
     
     def add_log(self, message):
         timestamp = datetime.now().strftime("%H:%M:%S")
