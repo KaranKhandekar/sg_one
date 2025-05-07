@@ -1,26 +1,42 @@
-# PyKeka - File Archiver
+# SG One - The Creative Engine of Saks Global
 
-A modern file archiver application for compressing, extracting, and encrypting files.
+SG One is a powerful suite of creative tools designed for the Saks Global team, providing efficient solutions for image processing, file compression, and media handling.
 
 ## Features
 
-- Compress files to various formats (ZIP, 7Z)
-- Extract multiple archive formats
-- File encryption support
-- Modern drag-and-drop interface
-- Password protection for archives
+### Split Image
+- Split and organize images efficiently
+- Automatic background detection
+- Smart distribution to designers
+- Detailed activity logging
+- Excel report generation
 
-## Setup
+### SnapZip
+- Compress multiple files and folders
+- Support for ZIP and 7Z formats
+- Easy extraction of archives
+- Secure and efficient compression
+- Automatic exclusion of system files:
+  - .DS_Store (macOS)
+  - Thumbs.db (Windows)
+  - desktop.ini (Windows)
+- Real-time activity logging
 
-1. Create a virtual environment:
+### MediaPress
+- Compress media files while maintaining quality
+- Support for various image formats
+- Video compression
+- Audio compression
+- Video to GIF conversion
+
+## Installation
+
+1. Clone the repository:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Unix/macOS
-# or
-.\venv\Scripts\activate  # On Windows
+git clone https://github.com/KaranKhandekar/sg_one.git
 ```
 
-2. Install dependencies:
+2. Install the required dependencies:
 ```bash
 pip install -r requirements.txt
 ```
@@ -31,7 +47,24 @@ python src/main.py
 ```
 
 ## Requirements
-
 - Python 3.8 or higher
-- PyQt6
-- Additional dependencies listed in requirements.txt 
+- CustomTkinter
+- Pillow (PIL)
+- pandas
+- openpyxl
+- moviepy
+
+## Support
+
+For any issues or questions, please contact:
+- coe@saks.com
+- karan.khandekar@saks.com
+
+## Special Thanks
+Special thanks to Deepika Sharma and Gnanaprakash K for their support and contributions to the project.
+
+## License
+This project is proprietary and confidential. All rights reserved by Saks Global.
+
+## Version
+Current Version: 1.0.0 

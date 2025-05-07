@@ -211,9 +211,13 @@ class DashboardScreen:
         self.set_active_button(self.home_btn)
         self.clear_content()
         
+        # Create scrollable frame for the entire content
+        scrollable_frame = ctk.CTkScrollableFrame(self.content_frame, fg_color="transparent")
+        scrollable_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
         # Create home view content
-        welcome_frame = ctk.CTkFrame(self.content_frame, fg_color="#252525", corner_radius=15)
-        welcome_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        welcome_frame = ctk.CTkFrame(scrollable_frame, fg_color="#252525", corner_radius=15)
+        welcome_frame.pack(fill=tk.BOTH, expand=True, padx=0, pady=0)
         
         # Welcome message
         ctk.CTkLabel(
@@ -234,7 +238,14 @@ class DashboardScreen:
         # App description
         description = """
 SG One is a powerful suite of creative tools designed for the Saks Global team.
-It provides two main applications:
+It provides three main applications:
+
+• Split Image
+  - Split and organize images efficiently
+  - Automatic background detection
+  - Smart distribution to designers
+  - Detailed activity logging
+  - Excel report generation
 
 • SnapZip
   - Compress multiple files and folders
@@ -250,8 +261,9 @@ It provides two main applications:
 • MediaPress
   - Compress media files while maintaining quality
   - Support for various image formats
-  - Video compression (Coming Soon)
-  - Audio compression (Coming Soon)
+  - Video compression
+  - Audio compression
+  - Video to GIF conversion
 
 Choose an application from the sidebar to get started!
         """
@@ -263,6 +275,79 @@ Choose an application from the sidebar to get started!
             text_color="#FFFFFF",
             justify="left"
         ).pack(pady=20, padx=40)
+        
+        # Separator line
+        separator = ctk.CTkFrame(
+            welcome_frame,
+            height=2,
+            fg_color="#333333"
+        )
+        separator.pack(fill=tk.X, padx=40, pady=20)
+        
+        # Support Contact
+        contact_frame = ctk.CTkFrame(welcome_frame, fg_color="transparent")
+        contact_frame.pack(fill=tk.X, padx=40, pady=(20, 10))
+        
+        ctk.CTkLabel(
+            contact_frame,
+            text="Support Contact",
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color="#00F5C4"
+        ).pack(anchor="w")
+        
+        ctk.CTkLabel(
+            contact_frame,
+            text="coe@saks.com | karan.khandekar@saks.com",
+            font=ctk.CTkFont(size=16),
+            text_color="#FFFFFF"
+        ).pack(anchor="w", pady=(5, 0))
+        
+        # Special Thanks
+        thanks_frame = ctk.CTkFrame(welcome_frame, fg_color="transparent")
+        thanks_frame.pack(fill=tk.X, padx=40, pady=(20, 10))
+        
+        ctk.CTkLabel(
+            thanks_frame,
+            text="Special Thanks",
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color="#00F5C4"
+        ).pack(anchor="w")
+        
+        ctk.CTkLabel(
+            thanks_frame,
+            text="Deepika Sharma and Gnanaprakash K",
+            font=ctk.CTkFont(size=16),
+            text_color="#FFFFFF"
+        ).pack(anchor="w", pady=(5, 0))
+        
+        # GitHub Link
+        github_frame = ctk.CTkFrame(welcome_frame, fg_color="transparent")
+        github_frame.pack(fill=tk.X, padx=40, pady=(20, 20))
+        
+        ctk.CTkLabel(
+            github_frame,
+            text="GitHub Repository",
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color="#00F5C4"
+        ).pack(anchor="w", pady=(0, 10))
+        
+        github_btn = ctk.CTkButton(
+            github_frame,
+            text="Visit GitHub Repository",
+            font=ctk.CTkFont(size=16, weight="bold"),
+            command=lambda: self.open_github(),
+            fg_color="#00F5C4",
+            hover_color="#00D4A8",
+            text_color="#000000",
+            height=45,
+            corner_radius=8,
+            width=250
+        )
+        github_btn.pack(anchor="w")
+    
+    def open_github(self):
+        import webbrowser
+        webbrowser.open("https://github.com/KaranKhandekar/sg_one")
     
     def show_file_compress(self):
         self.set_active_button(self.file_compress_btn)
