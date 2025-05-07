@@ -151,6 +151,13 @@ class DashboardScreen:
             self.show_media_compress
         )
         
+        # Split Image button
+        self.split_image_btn = self.create_nav_button(
+            nav_frame,
+            "🖼️ Split Image",
+            self.show_split_image
+        )
+        
         # Footer in sidebar
         footer_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         footer_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=20, pady=20)
@@ -187,7 +194,7 @@ class DashboardScreen:
     
     def set_active_button(self, active_btn):
         # Reset all buttons
-        for btn in [self.home_btn, self.file_compress_btn, self.media_compress_btn]:
+        for btn in [self.home_btn, self.file_compress_btn, self.media_compress_btn, self.split_image_btn]:
             btn.configure(
                 fg_color="transparent",
                 text_color="#FFFFFF"
@@ -270,6 +277,17 @@ Choose an application from the sidebar to get started!
         if self.current_view:
             self.current_view.destroy()
         self.current_view = MediaCompressApp(self.content_frame, self)
+        self.current_view.pack(fill=tk.BOTH, expand=True)
+        self.root.update()  # Force update the UI
+    
+    def show_split_image(self):
+        self.set_active_button(self.split_image_btn)
+        self.clear_content()
+        if self.current_view:
+            self.current_view.destroy()
+        # Import here to avoid circular import at the top
+        from apps.split_Iimage import SplitImageApp
+        self.current_view = SplitImageApp(self.content_frame, self)
         self.current_view.pack(fill=tk.BOTH, expand=True)
         self.root.update()  # Force update the UI
     
