@@ -319,6 +319,25 @@ Choose an application from the sidebar to get started!
             font=ctk.CTkFont(size=16),
             text_color="#FFFFFF"
         ).pack(anchor="w", pady=(5, 0))
+
+        # Logo Designed
+        logo_designer = ctk.CTkFrame(welcome_frame, fg_color="transparent")
+        logo_designer.pack(fill=tk.X, padx=40, pady=(20, 10))
+        
+        ctk.CTkLabel(
+            logo_designer,
+            text="Logo Designed by",
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color="#00F5C4"
+        ).pack(anchor="w")
+        
+        ctk.CTkLabel(
+            logo_designer,
+            text="Kaushal Singh",
+            font=ctk.CTkFont(size=16),
+            text_color="#FFFFFF"
+        ).pack(anchor="w", pady=(5, 0))
+        
         
         # GitHub Link
         github_frame = ctk.CTkFrame(welcome_frame, fg_color="transparent")
