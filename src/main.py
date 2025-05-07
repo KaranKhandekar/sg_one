@@ -7,6 +7,7 @@ from PIL import Image, ImageTk
 import time
 from apps.file_compress import FileCompressApp
 from apps.media_compress import MediaCompressApp
+from apps.split_image import SplitImageApp
 import tkinter.messagebox as messagebox
 
 class SplashScreen:
@@ -281,15 +282,27 @@ Choose an application from the sidebar to get started!
         self.root.update()  # Force update the UI
     
     def show_split_image(self):
+        print("Starting show_split_image...")  # Debug log
         self.set_active_button(self.split_image_btn)
+        print("Button set active...")  # Debug log
         self.clear_content()
+        print("Content cleared...")  # Debug log
         if self.current_view:
+            print("Destroying current view...")  # Debug log
             self.current_view.destroy()
-        # Import here to avoid circular import at the top
-        from apps.split_Iimage import SplitImageApp
-        self.current_view = SplitImageApp(self.content_frame, self)
-        self.current_view.pack(fill=tk.BOTH, expand=True)
-        self.root.update()  # Force update the UI
+        try:
+            print("Creating SplitImageApp...")  # Debug log
+            self.current_view = SplitImageApp(self.content_frame, self)
+            print("SplitImageApp created...")  # Debug log
+            self.current_view.pack(fill=tk.BOTH, expand=True)
+            print("SplitImageApp packed...")  # Debug log
+            self.root.update()
+            print("Root updated...")  # Debug log
+            self.root.lift()
+            print("Window lifted...")  # Debug log
+        except Exception as e:
+            print(f"Error in show_split_image: {str(e)}")  # Debug log
+            messagebox.showerror("Error", f"Failed to load Split Image module: {str(e)}")
     
     def clear_content(self):
         for widget in self.content_frame.winfo_children():
