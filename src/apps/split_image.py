@@ -297,10 +297,9 @@ class SplitImageApp(ctk.CTkFrame):
         self.designer_input = ctk.CTkEntry(
             designer_frame,
             placeholder_text="Enter number between 1-60",
-            width=400,
             height=35
         )
-        self.designer_input.pack(pady=(0, 20), padx=20)
+        self.designer_input.pack(fill=tk.X, expand=True, pady=(0, 20), padx=20)
         
         # Source Folder Selection
         folder_frame = ctk.CTkFrame(settings_frame, fg_color="#333333", corner_radius=10)
