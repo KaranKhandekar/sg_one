@@ -1,0 +1,91 @@
+('/Users/karan.khandekar/Documents/Software and '
+ 'Plug-Ins/SG_ONE_Github/build/SG_One/SG One',
+ False,
+ False,
+ True,
+ ['/Users/karan.khandekar/Documents/Software and '
+  'Plug-Ins/SG_ONE_Github/src/assets/icon.icns'],
+ None,
+ False,
+ False,
+ None,
+ True,
+ True,
+ 'arm64',
+ None,
+ None,
+ '/Users/karan.khandekar/Documents/Software and '
+ 'Plug-Ins/SG_ONE_Github/build/SG_One/SG One.pkg',
+ [('pyi-macos-argv-emulation', '', 'OPTION'),
+  ('pyi-contents-directory _internal', '', 'OPTION'),
+  ('PYZ-00.pyz',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/build/SG_One/PYZ-00.pyz',
+   'PYZ'),
+  ('lib-dynload/_struct.cpython-313-darwin.so',
+   '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload/_struct.cpython-313-darwin.so',
+   'EXTENSION'),
+  ('lib-dynload/zlib.cpython-313-darwin.so',
+   '/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/lib-dynload/zlib.cpython-313-darwin.so',
+   'EXTENSION'),
+  ('struct',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/build/SG_One/localpycs/struct.pyc',
+   'PYMODULE'),
+  ('pyimod01_archive',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/build/SG_One/localpycs/pyimod01_archive.pyc',
+   'PYMODULE'),
+  ('pyimod02_importers',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/build/SG_One/localpycs/pyimod02_importers.pyc',
+   'PYMODULE'),
+  ('pyimod03_ctypes',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/build/SG_One/localpycs/pyimod03_ctypes.pyc',
+   'PYMODULE'),
+  ('pyiboot01_bootstrap',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/.venv/lib/python3.13/site-packages/PyInstaller/loader/pyiboot01_bootstrap.py',
+   'PYSOURCE'),
+  ('pyi_rth_inspect',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/.venv/lib/python3.13/site-packages/PyInstaller/hooks/rthooks/pyi_rth_inspect.py',
+   'PYSOURCE'),
+  ('pyi_rth_pkgutil',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/.venv/lib/python3.13/site-packages/PyInstaller/hooks/rthooks/pyi_rth_pkgutil.py',
+   'PYSOURCE'),
+  ('pyi_rth_multiprocessing',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/.venv/lib/python3.13/site-packages/PyInstaller/hooks/rthooks/pyi_rth_multiprocessing.py',
+   'PYSOURCE'),
+  ('pyi_rth_setuptools',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/.venv/lib/python3.13/site-packages/PyInstaller/hooks/rthooks/pyi_rth_setuptools.py',
+   'PYSOURCE'),
+  ('pyi_rth_pkgres',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/.venv/lib/python3.13/site-packages/PyInstaller/hooks/rthooks/pyi_rth_pkgres.py',
+   'PYSOURCE'),
+  ('pyi_rth_mplconfig',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/.venv/lib/python3.13/site-packages/PyInstaller/hooks/rthooks/pyi_rth_mplconfig.py',
+   'PYSOURCE'),
+  ('pyi_rth__tkinter',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/.venv/lib/python3.13/site-packages/PyInstaller/hooks/rthooks/pyi_rth__tkinter.py',
+   'PYSOURCE'),
+  ('main',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/src/main.py',
+   'PYSOURCE')],
+ [],
+ False,
+ False,
+ 1746683748,
+ [('runw',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/.venv/lib/python3.13/site-packages/PyInstaller/bootloader/Darwin-64bit/runw',
+   'EXECUTABLE')],
+ '/Library/Frameworks/Python.framework/Versions/3.13/Python')
