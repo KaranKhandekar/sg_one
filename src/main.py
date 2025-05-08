@@ -441,7 +441,25 @@ def main():
             root.quit()
             root.destroy()
     
+    # Handle window activation
+    def on_activate():
+        root.lift()  # Bring window to front
+        root.focus_force()  # Force focus
+        root.attributes('-topmost', True)  # Make window stay on top
+        root.after(100, lambda: root.attributes('-topmost', False))  # Remove topmost after a short delay
+    
+    # Bind window activation events
+    root.bind('<FocusIn>', lambda e: on_activate())
+    root.bind('<Map>', lambda e: on_activate())  # Handle window being mapped (shown)
+    root.bind('<Visibility>', lambda e: on_activate())  # Handle window becoming visible
+    
+    # Set up protocol for window manager events
     root.protocol("WM_DELETE_WINDOW", on_closing)
+    
+    # For macOS, bind to dock icon click
+    if sys.platform == 'darwin':
+        root.createcommand('tk::mac::ReopenApplication', on_activate)
+    
     root.mainloop()
 
 if __name__ == "__main__":
