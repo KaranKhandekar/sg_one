@@ -233,48 +233,128 @@ class DashboardScreen:
             text="The Creative Engine of Saks Global",
             font=ctk.CTkFont(size=20, weight="bold"),
             text_color="#FFFFFF"
-        ).pack(pady=(0, 30))
+        ).pack(pady=(0, 20))
         
-        # App description
-        description = """
-SG One is a powerful suite of creative tools designed for the Saks Global team.
-It provides three main applications:
-
-• Split Image
-  - Split and organize images efficiently
-  - Automatic background detection
-  - Smart distribution to designers
-  - Detailed activity logging
-  - Excel report generation
-
-• SnapZip
-  - Compress multiple files and folders
-  - Support for ZIP and 7Z formats
-  - Easy extraction of archives
-  - Secure and efficient compression
-  - Automatic exclusion of system files:
-    ∙ .DS_Store (macOS)
-    ∙ Thumbs.db (Windows)
-    ∙ desktop.ini (Windows)
-  - Real-time activity logging
-
-• MediaPress
-  - Compress media files while maintaining quality
-  - Support for various image formats
-  - Video compression
-  - Audio compression
-  - Video to GIF conversion
-
-Choose an application from the sidebar to get started!
-        """
+        # Logo Frame
+        logo_frame = ctk.CTkFrame(welcome_frame, fg_color="transparent")
+        logo_frame.pack(pady=20)
         
+        try:
+            # Load and display the logo
+            logo_path = os.path.join(os.path.dirname(__file__), "assets", "logo.png")
+            logo_image = Image.open(logo_path)
+            # Resize logo while maintaining aspect ratio
+            logo_width = 200  # Adjust this value as needed
+            aspect_ratio = logo_image.height / logo_image.width
+            logo_height = int(logo_width * aspect_ratio)
+            logo_image = logo_image.resize((logo_width, logo_height), Image.Resampling.LANCZOS)
+            logo_photo = ImageTk.PhotoImage(logo_image)
+            
+            logo_label = ctk.CTkLabel(
+                logo_frame,
+                image=logo_photo,
+                text=""  # Empty text to show only image
+            )
+            logo_label.image = logo_photo  # Keep a reference
+            logo_label.pack()
+        except Exception as e:
+            print(f"Error loading logo: {e}")
+        
+        # App description header
         ctk.CTkLabel(
             welcome_frame,
-            text=description,
+            text="Powerful Suite of Creative Tools",
+            font=ctk.CTkFont(size=24, weight="bold"),
+            text_color="#00F5C4"
+        ).pack(pady=(30, 20))
+        
+        # Create a frame for the three columns
+        modules_frame = ctk.CTkFrame(welcome_frame, fg_color="transparent")
+        modules_frame.pack(fill=tk.X, padx=40, pady=20)
+        
+        # Configure grid layout
+        modules_frame.grid_columnconfigure(0, weight=1)
+        modules_frame.grid_columnconfigure(1, weight=1)
+        modules_frame.grid_columnconfigure(2, weight=1)
+        
+        # Split Image Module
+        split_frame = ctk.CTkFrame(modules_frame, fg_color="#333333", corner_radius=10)
+        split_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+        
+        ctk.CTkLabel(
+            split_frame,
+            text="Split Image",
+            font=ctk.CTkFont(size=20, weight="bold"),
+            text_color="#00F5C4"
+        ).pack(pady=(15, 10))
+        
+        split_features = """
+• Split and organize images
+• Automatic background detection
+• Smart distribution to designers
+• Detailed activity logging
+• Excel report generation
+        """
+        ctk.CTkLabel(
+            split_frame,
+            text=split_features,
             font=ctk.CTkFont(size=14),
             text_color="#FFFFFF",
             justify="left"
-        ).pack(pady=20, padx=40)
+        ).pack(pady=(0, 15), padx=15)
+        
+        # SnapZip Module
+        snapzip_frame = ctk.CTkFrame(modules_frame, fg_color="#333333", corner_radius=10)
+        snapzip_frame.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+        
+        ctk.CTkLabel(
+            snapzip_frame,
+            text="SnapZip",
+            font=ctk.CTkFont(size=20, weight="bold"),
+            text_color="#00F5C4"
+        ).pack(pady=(15, 10))
+        
+        snapzip_features = """
+• Compress multiple files
+• ZIP and 7Z formats
+• Easy extraction
+• Secure compression
+• System file exclusion
+• Real-time logging
+        """
+        ctk.CTkLabel(
+            snapzip_frame,
+            text=snapzip_features,
+            font=ctk.CTkFont(size=14),
+            text_color="#FFFFFF",
+            justify="left"
+        ).pack(pady=(0, 15), padx=15)
+        
+        # MediaPress Module
+        media_frame = ctk.CTkFrame(modules_frame, fg_color="#333333", corner_radius=10)
+        media_frame.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
+        
+        ctk.CTkLabel(
+            media_frame,
+            text="MediaPress",
+            font=ctk.CTkFont(size=20, weight="bold"),
+            text_color="#00F5C4"
+        ).pack(pady=(15, 10))
+        
+        media_features = """
+• Media file compression
+• Multiple image formats
+• Video compression
+• Audio compression
+• Video to GIF conversion
+        """
+        ctk.CTkLabel(
+            media_frame,
+            text=media_features,
+            font=ctk.CTkFont(size=14),
+            text_color="#FFFFFF",
+            justify="left"
+        ).pack(pady=(0, 15), padx=15)
         
         # Separator line
         separator = ctk.CTkFrame(
@@ -319,7 +399,7 @@ Choose an application from the sidebar to get started!
             font=ctk.CTkFont(size=16),
             text_color="#FFFFFF"
         ).pack(anchor="w", pady=(5, 0))
-
+        
         # Logo Designed
         logo_designer = ctk.CTkFrame(welcome_frame, fg_color="transparent")
         logo_designer.pack(fill=tk.X, padx=40, pady=(20, 10))
@@ -337,7 +417,6 @@ Choose an application from the sidebar to get started!
             font=ctk.CTkFont(size=16),
             text_color="#FFFFFF"
         ).pack(anchor="w", pady=(5, 0))
-        
         
         # GitHub Link
         github_frame = ctk.CTkFrame(welcome_frame, fg_color="transparent")
