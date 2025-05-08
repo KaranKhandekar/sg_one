@@ -171,7 +171,7 @@ class MediaCompressApp(ctk.CTkFrame):
             fg_color="#333333"
         )
         self.progress.set(0)
-        
+    
         # Separator line
         separator = ctk.CTkFrame(
             content_frame,

@@ -1,23 +1,22 @@
 ('/Users/karan.khandekar/Documents/Software and '
- 'Plug-Ins/SG_ONE_Github/build/SG_One/SG One',
+ 'Plug-Ins/SG_ONE_Github/build/SG_One/SG_One',
  False,
  False,
  True,
  ['/Users/karan.khandekar/Documents/Software and '
-  'Plug-Ins/SG_ONE_Github/src/assets/icon.icns'],
+  'Plug-Ins/SG_ONE_Github/src/assets/logo.icns'],
  None,
  False,
  False,
  None,
  True,
- True,
+ False,
  'arm64',
  None,
  None,
  '/Users/karan.khandekar/Documents/Software and '
- 'Plug-Ins/SG_ONE_Github/build/SG_One/SG One.pkg',
- [('pyi-macos-argv-emulation', '', 'OPTION'),
-  ('pyi-contents-directory _internal', '', 'OPTION'),
+ 'Plug-Ins/SG_ONE_Github/build/SG_One/SG_One.pkg',
+ [('pyi-contents-directory _internal', '', 'OPTION'),
   ('PYZ-00.pyz',
    '/Users/karan.khandekar/Documents/Software and '
    'Plug-Ins/SG_ONE_Github/build/SG_One/PYZ-00.pyz',
@@ -83,7 +82,7 @@
  [],
  False,
  False,
- 1746683748,
+ 1746710564,
  [('runw',
    '/Users/karan.khandekar/Documents/Software and '
    'Plug-Ins/SG_ONE_Github/.venv/lib/python3.13/site-packages/PyInstaller/bootloader/Darwin-64bit/runw',

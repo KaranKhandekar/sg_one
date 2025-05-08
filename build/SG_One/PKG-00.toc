@@ -1,5 +1,5 @@
 ('/Users/karan.khandekar/Documents/Software and '
- 'Plug-Ins/SG_ONE_Github/build/SG_One/SG One.pkg',
+ 'Plug-Ins/SG_ONE_Github/build/SG_One/SG_One.pkg',
  {'BINARY': True,
   'DATA': True,
   'EXECUTABLE': True,
@@ -9,8 +9,7 @@
   'PYZ': False,
   'SPLASH': True,
   'SYMLINK': False},
- [('pyi-macos-argv-emulation', '', 'OPTION'),
-  ('pyi-contents-directory _internal', '', 'OPTION'),
+ [('pyi-contents-directory _internal', '', 'OPTION'),
   ('PYZ-00.pyz',
    '/Users/karan.khandekar/Documents/Software and '
    'Plug-Ins/SG_ONE_Github/build/SG_One/PYZ-00.pyz',

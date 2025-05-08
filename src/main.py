@@ -85,7 +85,9 @@ class SplashScreen:
             self.progress.set(i/100)
             self.root.update()
             time.sleep(0.02)
-        self.root.destroy()
+        # Instead of destroying, just hide the splash screen
+        self.frame.pack_forget()
+        self.root.overrideredirect(False)  # Restore window decorations
 
 class DashboardScreen:
     def __init__(self, root):
@@ -497,13 +499,6 @@ class DashboardScreen:
 def main():
     # Create root window
     root = ctk.CTk()
-    
-    # Show splash screen
-    splash = SplashScreen(root)
-    root.mainloop()
-    
-    # Create new root window for dashboard
-    root = ctk.CTk()
     root.title("SG One")
     root.geometry("1400x800")
     
@@ -511,35 +506,42 @@ def main():
     ctk.set_appearance_mode("dark")
     ctk.set_default_color_theme("blue")
     
-    # Create dashboard
-    app = DashboardScreen(root)
-    
-    # Handle window close
-    def on_closing():
-        if messagebox.askokcancel("Quit", "Do you want to quit?"):
-            root.quit()
-            root.destroy()
-    
-    # Handle window activation
-    def on_activate():
-        root.lift()  # Bring window to front
-        root.focus_force()  # Force focus
-        root.attributes('-topmost', True)  # Make window stay on top
-        root.after(100, lambda: root.attributes('-topmost', False))  # Remove topmost after a short delay
-    
-    # Bind window activation events
-    root.bind('<FocusIn>', lambda e: on_activate())
-    root.bind('<Map>', lambda e: on_activate())  # Handle window being mapped (shown)
-    root.bind('<Visibility>', lambda e: on_activate())  # Handle window becoming visible
-    
-    # Set up protocol for window manager events
-    root.protocol("WM_DELETE_WINDOW", on_closing)
+    # Configure window state handling
+    root.protocol("WM_DELETE_WINDOW", lambda: on_closing(root))
+    root.bind('<Unmap>', lambda e: handle_window_state(e, root))
+    root.bind('<Map>', lambda e: handle_window_state(e, root))
     
     # For macOS, bind to dock icon click
     if sys.platform == 'darwin':
-        root.createcommand('tk::mac::ReopenApplication', on_activate)
+        root.createcommand('tk::mac::ReopenApplication', lambda: on_activate(root))
+    
+    # Show splash screen
+    splash = SplashScreen(root)
+    
+    # Create dashboard after splash
+    app = DashboardScreen(root)
     
     root.mainloop()
+
+def handle_window_state(event, root):
+    """Handle window state changes"""
+    if event.type == '2':  # Unmap (minimize)
+        root.withdraw()
+    elif event.type == '19':  # Map (restore)
+        root.deiconify()
+        root.lift()
+        root.focus_force()
+
+def on_closing(root):
+    """Handle window closing"""
+    if messagebox.askokcancel("Quit", "Do you want to quit?"):
+        root.quit()
+
+def on_activate(root):
+    """Handle app activation (clicking dock icon)"""
+    root.deiconify()
+    root.lift()
+    root.focus_force()
 
 if __name__ == "__main__":
     main() 

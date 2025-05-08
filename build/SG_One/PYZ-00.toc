@@ -456,6 +456,10 @@
    '/Users/karan.khandekar/Documents/Software and '
    'Plug-Ins/SG_ONE_Github/.venv/lib/python3.13/site-packages/PIL/_deprecate.py',
    'PYMODULE'),
+  ('PIL._tkinter_finder',
+   '/Users/karan.khandekar/Documents/Software and '
+   'Plug-Ins/SG_ONE_Github/.venv/lib/python3.13/site-packages/PIL/_tkinter_finder.py',
+   'PYMODULE'),
   ('PIL._typing',
    '/Users/karan.khandekar/Documents/Software and '
    'Plug-Ins/SG_ONE_Github/.venv/lib/python3.13/site-packages/PIL/_typing.py',

@@ -241,6 +241,10 @@ class SplitImageApp(ctk.CTkFrame):
         self.dashboard = dashboard
         self.processor = None
         
+        # Bind window state change event
+        self.root.bind('<Unmap>', self.on_window_minimize)
+        self.root.bind('<Map>', self.on_window_restore)
+        
         # Create main container
         main_container = ctk.CTkFrame(self, fg_color="transparent")
         main_container.pack(fill=tk.BOTH, expand=True)
@@ -293,12 +297,27 @@ class SplitImageApp(ctk.CTkFrame):
             text_color="#FFFFFF"
         ).pack(pady=(20, 10), padx=20)
         
-        self.designer_input = ctk.CTkEntry(
-            designer_frame,
-            placeholder_text="Enter number between 1-60",
-            height=35
+        # Create a frame for the dropdown to control its width
+        dropdown_container = ctk.CTkFrame(designer_frame, fg_color="transparent")
+        dropdown_container.pack(fill=tk.X, pady=(0, 20), padx=20)
+        
+        # Create dropdown with scrollable values
+        self.designer_input = ctk.CTkOptionMenu(
+            dropdown_container,
+            values=[str(i) for i in range(1, 61)],
+            width=600,  # Increased width
+            height=35,
+            font=ctk.CTkFont(size=14),
+            dropdown_font=ctk.CTkFont(size=14),
+            command=self.validate_inputs,
+            fg_color="#404040",
+            button_color="#404040",
+            button_hover_color="#505050",
+            dropdown_fg_color="#404040",
+            dropdown_hover_color="#505050"
         )
-        self.designer_input.pack(fill=tk.X, expand=True, pady=(0, 20), padx=20)
+        self.designer_input.pack(fill=tk.X, expand=True)
+        self.designer_input.set("Select number of designers")
         
         # Source Folder Selection
         folder_frame = ctk.CTkFrame(settings_frame, fg_color="#333333", corner_radius=10)
@@ -494,13 +513,6 @@ class SplitImageApp(ctk.CTkFrame):
         # Add initial log entry
         self.add_log("Split Image module initialized")
         
-        # Bind input validation
-        self.designer_input.bind('<KeyRelease>', lambda e: self.validate_inputs())
-        
-        # Add these lines at the start of __init__
-        self.last_designer_count = ""
-        self.last_folder_path = ""
-        
         # Bind resize event
         self.bind('<Configure>', self._on_resize)
     
@@ -510,7 +522,7 @@ class SplitImageApp(ctk.CTkFrame):
     
     def _on_mousewheel(self, event):
         self.scrollable_frame.yview_scroll(int(-1*(event.delta/120)), "units")
-    
+        
     def browse_folder(self):
         folder = filedialog.askdirectory(title="Select Image Folder")
         if folder:
@@ -520,19 +532,17 @@ class SplitImageApp(ctk.CTkFrame):
             self.validate_inputs()
             self.add_log(f"Source folder selected: {folder}")
     
-    def validate_inputs(self):
-        designer_valid = False
+    def validate_inputs(self, value=None):
+        """Validate the input fields"""
         try:
-            if self.designer_input.get():
-                num_designers = int(self.designer_input.get())
-                designer_valid = 1 <= num_designers <= 60
-                self.last_designer_count = self.designer_input.get()
+            if value and value != "Select number of designers":
+                num = int(value)
+                if 1 <= num <= 60:
+                    self.run_button.configure(state="normal")
+                    return
+            self.run_button.configure(state="disabled")
         except ValueError:
-            designer_valid = False
-        
-        folder_valid = bool(self.folder_input.get())
-        
-        self.run_button.configure(state="normal" if designer_valid and folder_valid else "disabled")
+            self.run_button.configure(state="disabled")
     
     def start_processing(self):
         try:
@@ -600,7 +610,7 @@ class SplitImageApp(ctk.CTkFrame):
     def reset_application(self):
         if messagebox.askyesno('Reset Split Image',
                              'Are you sure you want to reset? This will clear all inputs and progress.'):
-            self.designer_input.delete(0, tk.END)
+            self.designer_input.set("Select number of designers")
             self.folder_input.delete(0, tk.END)
             self.reset_progress()
             self.scan_progress_label.configure(text="Scanning Images...")
@@ -626,4 +636,15 @@ class SplitImageApp(ctk.CTkFrame):
         self.log_text.configure(state='normal')
         self.log_text.delete(1.0, tk.END)
         self.log_text.configure(state='disabled')
-        self.add_log("Log cleared") 
+        self.add_log("Log cleared")
+
+    def on_window_minimize(self, event):
+        """Handle window minimize event"""
+        self.add_log("Window minimized")
+        
+    def on_window_restore(self, event):
+        """Handle window restore event"""
+        self.add_log("Window restored")
+        self.root.deiconify()  # Ensure window is visible
+        self.root.lift()  # Bring window to front
+        self.root.focus_force()  # Force focus on window

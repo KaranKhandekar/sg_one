@@ -231,7 +231,7 @@ class FileCompressApp(ctk.CTkFrame):
             
         # Get the directory of the first selected item
         base_dir = os.path.dirname(paths[0])
-        
+            
         # Show progress
         self.progress.pack(pady=20)
         self.progress.start()
@@ -331,7 +331,7 @@ class FileCompressApp(ctk.CTkFrame):
             messagebox.showinfo("Success", message)
         else:
             self.add_log(f"Error: {message}")
-            messagebox.showerror("Error", message)
+            messagebox.showerror("Error", message) 
     
     def handle_batch_zip(self):
         """Handle batch compression of multiple folders"""

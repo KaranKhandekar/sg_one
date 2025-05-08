@@ -4,4 +4,6 @@ cryptography==42.0.5
 pillow==10.2.0
 customtkinter==5.2.2
 pandas==2.2.1
-openpyxl==3.1.2 
+openpyxl==3.1.2
+moviepy==1.0.3
+pyinstaller==6.4.0 
